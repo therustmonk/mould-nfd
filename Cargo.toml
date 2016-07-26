@@ -1,0 +1,10 @@
+[package]
+name = "mould-nfd"
+version = "0.0.1"
+authors = ["Denis Kolodin <deniskolodin@gmail.com>"]
+
+[dependencies]
+mould = { path = "../mould" }
+nfd = { path = "../nfd-rs" }
+rustc-serialize = "~0.3.19"
+json_macro = "~0.1.1"
