@@ -54,13 +54,12 @@ impl<CTX> Worker<CTX> for DialogWorker {
                 self.path.as_ref().map(String::as_ref),
                 self.dialog_type));
         let mut vec: Vec<String> = Vec::new();
-        let mut canceled = false;
         match res {
             Response::Okay(file) => vec.push(file),
             Response::OkayMultiple(files) => vec.extend(files),
-            Response::Cancel => canceled = true,
+            Response::Cancel => (), // Leave vec empty
         }
-        Ok(Realize::OneItemAndDone(json_object!{"files" => vec, "canceled" => canceled}))
+        Ok(Realize::OneItemAndDone(mould_object!{"files" => vec}))
     }
 
 }
