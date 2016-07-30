@@ -2,25 +2,20 @@ use mould::prelude::*;
 use nfd::{self, Response, DialogType};
 use super::HasBrowseFilesPermission;
 
-pub struct DialogHandler { }
+pub struct DialogRouter { }
 
-impl DialogHandler {
+impl DialogRouter {
 
     pub fn new() -> Self {
-        DialogHandler { }
+        DialogRouter { }
     }
 
 }
 
-impl<CTX> Handler<CTX> for DialogHandler where CTX: HasBrowseFilesPermission {
-    fn build(&self, mut request: Request) -> Box<Worker<CTX>> {
+impl<CTX> Router<CTX> for DialogRouter where CTX: HasBrowseFilesPermission {
+    fn route(&self, _: &CTX, request: &Request) -> Box<Worker<CTX>> {
         if request.action == "show-dialog" {
-            Box::new(DialogWorker {
-                path: request.extract("path"),
-                filter: request.extract("filter"),
-                mode: request.extract("mode"),
-                dialog_type: DialogType::SingleFile,
-            })
+            Box::new(DialogWorker::new())
         } else {
             let msg = format!("Unknown action '{}' for dialog service!", request.action);
             Box::new(RejectWorker::new(msg))
@@ -31,29 +26,37 @@ impl<CTX> Handler<CTX> for DialogHandler where CTX: HasBrowseFilesPermission {
 struct DialogWorker {
     path: Option<String>,
     filter: Option<String>,
-    mode: Option<String>,
     dialog_type: DialogType,
+}
+
+impl DialogWorker {
+    fn new() -> Self {
+        DialogWorker { path: None, filter: None, dialog_type: DialogType::SingleFile }
+    }
 }
 
 impl<CTX> Worker<CTX> for DialogWorker where CTX: HasBrowseFilesPermission {
 
-    fn shortcut(&mut self, session: &mut CTX) -> WorkerResult<Shortcut> {
-        let res = match self.mode.as_ref().map(String::as_ref) {
+    fn prepare(&mut self, context: &mut CTX, mut request: Request) -> worker::Result<Shortcut> {
+        self.path = request.extract("path");
+        self.filter = request.extract("filter");
+        let mode: Option<String> = request.extract("mode");
+        let res = match mode.as_ref().map(String::as_ref) {
             Some("open") | None => Ok(DialogType::SingleFile),
             Some("multiple") => Ok(DialogType::MultipleFiles),
             Some("save") => Ok(DialogType::SaveFile),
-            Some(mode) => Err(WorkerError::Reject(format!("Unsupported mode {}", mode))),
+            Some(mode) => Err(worker::Error::Reject(format!("Unsupported mode {}", mode))),
         };
         let dt = try!(res);
         self.dialog_type = dt;
-        if session.has_permission() {
+        if context.has_permission() {
             Ok(Shortcut::Tuned)
         } else {
-            Err(WorkerError::Reject("You haven't permissions!".to_string()))
+            Err(worker::Error::reject("You haven't permissions!"))
         }
     }
 
-    fn realize(&mut self, _: &mut CTX, _: Option<Request>) -> WorkerResult<Realize> {
+    fn realize(&mut self, _: &mut CTX, _: Option<Request>) -> worker::Result<Realize> {
         let res = try!(nfd::open_dialog(
                 self.filter.as_ref().map(String::as_ref),
                 self.path.as_ref().map(String::as_ref),
