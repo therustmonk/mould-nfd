@@ -5,4 +5,5 @@ authors = ["Denis Kolodin <deniskolodin@gmail.com>"]
 
 [dependencies]
 mould = { path = "../mould" }
-nfd = { path = "../nfd-rs" }
+#nfd = { path = "../nfd-rs" }
+nfd = { git = "https://github.com/saurvs/nfd-rs" }
