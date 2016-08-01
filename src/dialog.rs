@@ -13,7 +13,7 @@ impl DialogRouter {
 }
 
 impl<CTX> Router<CTX> for DialogRouter where CTX: HasBrowseFilesPermission {
-    fn route(&self, _: &CTX, request: &Request) -> Box<Worker<CTX>> {
+    fn route(&self, request: &Request) -> Box<Worker<CTX>> {
         if request.action == "show-dialog" {
             Box::new(DialogWorker::new())
         } else {
