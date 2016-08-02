@@ -2,12 +2,10 @@
 
 #[macro_use]
 extern crate mould;
+extern crate permission;
 extern crate nfd;
 
-pub mod dialog;
+mod dialog;
 
-use mould::session::SessionData;
+pub use dialog::*;
 
-pub trait HasBrowseFilesPermission: SessionData {
-    fn has_permission(&self) -> bool;
-}

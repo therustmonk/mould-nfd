@@ -1,19 +1,25 @@
 use mould::prelude::*;
+use permission::HasPermission;
 use nfd::{self, Response, DialogType};
-use super::HasBrowseFilesPermission;
 
-pub struct DialogRouter { }
+pub enum DialogPermission {
+    CanOpenSingle,
+    CanSaveSingle,
+    CanOpenMultiple,
+}
 
-impl DialogRouter {
+pub struct DialogService { }
+
+impl DialogService {
 
     pub fn new() -> Self {
-        DialogRouter { }
+        DialogService { }
     }
 
 }
 
-impl<CTX> Router<CTX> for DialogRouter where CTX: HasBrowseFilesPermission {
-    fn route(&self, request: &Request) -> Box<Worker<CTX>> {
+impl<T> Service<T> for DialogService where T: HasPermission<DialogPermission> {
+    fn route(&self, request: &Request) -> Box<Worker<T>> {
         if request.action == "show-dialog" {
             Box::new(DialogWorker::new())
         } else {
@@ -35,9 +41,9 @@ impl DialogWorker {
     }
 }
 
-impl<CTX> Worker<CTX> for DialogWorker where CTX: HasBrowseFilesPermission {
+impl<T> Worker<T> for DialogWorker where T: HasPermission<DialogPermission> {
 
-    fn prepare(&mut self, context: &mut CTX, mut request: Request) -> worker::Result<Shortcut> {
+    fn prepare(&mut self, context: &mut T, mut request: Request) -> worker::Result<Shortcut> {
         self.path = request.extract("path");
         self.filter = request.extract("filter");
         let mode: Option<String> = request.extract("mode");
@@ -49,14 +55,14 @@ impl<CTX> Worker<CTX> for DialogWorker where CTX: HasBrowseFilesPermission {
         };
         let dt = try!(res);
         self.dialog_type = dt;
-        if context.has_permission() {
+        if context.has_permission(&DialogPermission::CanOpenSingle) {
             Ok(Shortcut::Tuned)
         } else {
             Err(worker::Error::reject("You haven't permissions!"))
         }
     }
 
-    fn realize(&mut self, _: &mut CTX, _: Option<Request>) -> worker::Result<Realize> {
+    fn realize(&mut self, _: &mut T, _: Option<Request>) -> worker::Result<Realize> {
         let res = try!(nfd::open_dialog(
                 self.filter.as_ref().map(String::as_ref),
                 self.path.as_ref().map(String::as_ref),

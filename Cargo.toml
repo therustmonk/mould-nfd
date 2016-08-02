@@ -7,3 +7,4 @@ authors = ["Denis Kolodin <deniskolodin@gmail.com>"]
 mould = { path = "../mould" }
 #nfd = { path = "../nfd-rs" }
 nfd = { git = "https://github.com/saurvs/nfd-rs" }
+permission = "0.1.0"
