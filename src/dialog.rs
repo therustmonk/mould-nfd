@@ -73,7 +73,11 @@ impl<T> Worker<T> for DialogWorker where T: HasPermission<DialogPermission> {
             Response::OkayMultiple(files) => vec.extend(files),
             Response::Cancel => (), // Leave vec empty
         }
-        Ok(Realize::OneItemAndDone(mould_object!{"files" => vec}))
+        if vec.len() > 0 {
+            Ok(Realize::OneItemAndDone(mould_object!{"files" => vec}))
+        } else {
+            Err(worker::Error::reject("Dialog was canceled!"))
+        }
     }
 
 }
