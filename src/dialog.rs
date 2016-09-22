@@ -51,6 +51,7 @@ impl<T> Worker<T> for DialogWorker where T: HasPermission<DialogPermission> {
             Some("open") | None => Ok(DialogType::SingleFile),
             Some("multiple") => Ok(DialogType::MultipleFiles),
             Some("save") => Ok(DialogType::SaveFile),
+            Some("folder") => Ok(DialogType::PickFolder),
             Some(mode) => Err(worker::Error::Reject(format!("Unsupported mode {}", mode))),
         };
         let dt = try!(res);
