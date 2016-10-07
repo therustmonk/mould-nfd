@@ -1,3 +1,4 @@
+use std::convert::Into;
 use mould::prelude::*;
 use permission::HasPermission;
 use nfd::{self, Response, DialogType};
@@ -57,7 +58,7 @@ impl<T> Worker<T> for DialogWorker where T: HasPermission<DialogPermission> {
         let dt = try!(res);
         self.dialog_type = dt;
         if !context.has_permission(&DialogPermission::CanOpenSingle) {
-            return Err(::std::convert::From::from("You haven't permissions."));
+            return Err("You haven't permissions.".into());
         }
         Ok(Shortcut::Tuned)
     }
