@@ -52,15 +52,14 @@ impl<T> Worker<T> for DialogWorker where T: HasPermission<DialogPermission> {
             Some("multiple") => Ok(DialogType::MultipleFiles),
             Some("save") => Ok(DialogType::SaveFile),
             Some("folder") => Ok(DialogType::PickFolder),
-            Some(mode) => Err(worker::Error::Reject(format!("Unsupported mode {}", mode))),
+            Some(mode) => Err(format!("Unsupported mode {}", mode)),
         };
         let dt = try!(res);
         self.dialog_type = dt;
-        if context.has_permission(&DialogPermission::CanOpenSingle) {
-            Ok(Shortcut::Tuned)
-        } else {
-            Err(worker::Error::reject("You haven't permissions!"))
+        if !context.has_permission(&DialogPermission::CanOpenSingle) {
+            return Err(::std::convert::From::from("You haven't permissions."));
         }
+        Ok(Shortcut::Tuned)
     }
 
     fn realize(&mut self, _: &mut T, _: Option<Request>) -> worker::Result<Realize> {
@@ -74,11 +73,8 @@ impl<T> Worker<T> for DialogWorker where T: HasPermission<DialogPermission> {
             Response::OkayMultiple(files) => vec.extend(files),
             Response::Cancel => (), // Leave vec empty
         }
-        if vec.len() > 0 {
-            Ok(Realize::OneItemAndDone(mould_object!{"files" => vec}))
-        } else {
-            Err(worker::Error::reject("Dialog was canceled!"))
-        }
+        ensure_it!(vec.len() == 0, "Dialog was canceled!");
+        Ok(Realize::OneItemAndDone(mould_object!{"files" => vec}))
     }
 
 }
