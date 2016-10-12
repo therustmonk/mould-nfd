@@ -4,6 +4,6 @@ version = "0.0.6"
 authors = ["Denis Kolodin <deniskolodin@gmail.com>"]
 
 [dependencies]
-mould = { path = "../mould" }
+mould = "0.0.17"
 nfd = { git = "https://github.com/saurvs/nfd-rs" }
 permission = "0.1.0"
