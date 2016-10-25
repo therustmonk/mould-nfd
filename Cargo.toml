@@ -2,6 +2,10 @@
 name = "mould-nfd"
 version = "0.0.6"
 authors = ["Denis Kolodin <deniskolodin@gmail.com>"]
+readme = "README.md"
+description = "Native file dialogs for Mould framework."
+repository = "https://github.com/DenisKolodin/mould-nfd"
+license = "MIT/Apache-2.0"
 
 [dependencies]
 mould = "0.0.17"
