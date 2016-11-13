@@ -1,6 +1,6 @@
 [package]
 name = "mould-nfd"
-version = "0.0.6"
+version = "0.0.7"
 authors = ["Denis Kolodin <deniskolodin@gmail.com>"]
 readme = "README.md"
 description = "Native file dialogs for Mould framework."
