@@ -8,6 +8,6 @@ repository = "https://github.com/DenisKolodin/mould-nfd"
 license = "MIT/Apache-2.0"
 
 [dependencies]
-mould = "0.0.18"
+mould = "0.0.19"
 nfd = "0.0.4"
 permission = "0.1.0"
